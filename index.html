@@ -3,56 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Survey Visualization</title>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <title>Evolving Coffee Tastes</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5dc; /* Beige background */
+            font-family: 'Nunito', sans-serif;
+            background-color: #ffffff; /* White background */
+        }
+
+        #navbar {
+            background-color: #faf0e6; /* Light grey background for nav bar */
+            padding: 15px;
+            text-align: center;
+        }
+
+        #title {
+            font-size: 32px;
+            margin: 0;
         }
 
         #filters {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 20px;
         }
 
-        #coffeeTypeImages {
+        #coffeeTypeTitle, #viewByTitle {
+            font-size: 24px;
+            margin-bottom: 10px;
             margin-top: 10px;
         }
 
-        .coffee-type-filter {
+        #coffeeTypeImages, #viewByImages {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .coffee-type-filter, .view-by-filter {
             display: inline-block;
             margin: 5px;
             cursor: pointer;
+            text-align: center;
         }
 
-        .coffee-type-filter img {
-            width: 30px;
-            height: 30px;
+        .coffee-type-filter img, .view-by-filter img {
+            width: 90px;
+            height: 90px;
+            padding: 2px; /* Add padding */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            border-radius: 5px; /* Round the outlined filters by 5px */
+        }
+
+        .coffee-type-label, .view-by-label {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px; /* Slightly smaller font size */
         }
 
         .rounded-button {
-            border-radius: 10px;
-            padding: 5px 10px;
+            font-family: 'Nunito', sans-serif; /* Apply Nunito font */
+            border-radius: 5px;
+            padding: 5px 10px; /* Smaller button size */
             border: none;
-            background-color: #e0e0e0;
-            cursor: pointer;
-        }
-
-        .view-by-button {
-            border-radius: 10px;
-            padding: 5px 10px;
-            border: none;
-            background-color: #e0e0e0;
+            background-color: #faf0e6;
             cursor: pointer;
             margin: 5px;
-        }
-
-        .view-by-button.active {
-            background-color: #ccc;
+            font-size: 14px; /* Smaller font size */
         }
 
         #chart {
@@ -60,201 +76,295 @@
             height: 600px;
             margin: auto;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .axis text {
+            font-family: 'Nunito', sans-serif; /* Apply Nunito font to axis labels */
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 6px;
+            font-size: 12px;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .chart-title {
+            margin-bottom: 20px; /* Add more spacing between the chart title and the actual graph */
         }
     </style>
 </head>
 <body>
+    <div id="navbar">
+        <div id="title">Evolving Coffee Tastes</div>
+    </div>
     <div id="filters">
-        <div id="coffee-type-filters">
-            <button id="selectAll" class="rounded-button">Select All</button>
-            <button id="clearAll" class="rounded-button">Clear All</button>
-            <!-- Placeholder for coffee type images -->
-            <div id="coffeeTypeImages">
-                <!-- Example: -->
-                <div class="coffee-type-filter">
-                    <img id="regularDrip" src="regular_drip.png" alt="Regular Drip">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="pourover" src="pourover.png" alt="Pourover">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="mocha" src="mocha.png" alt="Mocha">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="latte" src="latte.png" alt="Latte">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="icedCoffee" src="iced_coffee.png" alt="Iced Coffee">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="espresso" src="espresso.png" alt="Espresso">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="cortado" src="cortado.png" alt="Cortado">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="coldBrew" src="cold_brew.png" alt="Cold Brew">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="cappuccino" src="cappuccino.png" alt="Cappuccino">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="blendedDrink" src="blended_drink.png" alt="Blended Drink">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="americano" src="americano.png" alt="Americano">
-                </div>
-                <div class="coffee-type-filter">
-                    <img id="other" src="other.png" alt="Other">
-                </div>
+        <div id="coffeeTypeTitle">Coffee Types</div>
+        <button id="selectClearAll" class="rounded-button">Select/Clear All</button>
+        <div id="coffeeTypeImages">
+            <!-- Coffee type images -->
+            <div class="coffee-type-filter">
+                <img id="regularDrip" src="regular_drip.png" alt="Regular Drip">
+                <span class="coffee-type-label">Regular Drip</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="pourover" src="pourover.png" alt="Pourover">
+                <span class="coffee-type-label">Pourover</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="mocha" src="mocha.png" alt="Mocha">
+                <span class="coffee-type-label">Mocha</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="latte" src="latte.png" alt="Latte">
+                <span class="coffee-type-label">Latte</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="icedCoffee" src="iced_coffee.png" alt="Iced Coffee">
+                <span class="coffee-type-label">Iced Coffee</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="espresso" src="espresso.png" alt="Espresso">
+                <span class="coffee-type-label">Espresso</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="cortado" src="cortado.png" alt="Cortado">
+                <span class="coffee-type-label">Cortado</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="coldBrew" src="cold_brew.png" alt="Cold Brew">
+                <span class="coffee-type-label">Cold Brew</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="cappuccino" src="cappuccino.png" alt="Cappuccino">
+                <span class="coffee-type-label">Cappuccino</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="blendedDrink" src="blended_drink.png" alt="Blended Drink">
+                <span class="coffee-type-label">Blended Drink</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="americano" src="americano.png" alt="Americano">
+                <span class="coffee-type-label">Americano</span>
+            </div>
+            <div class="coffee-type-filter">
+                <img id="other" src="other.png" alt="Other">
+                <span class="coffee-type-label">Other</span>
             </div>
         </div>
-        <div id="viewByFilters">
-            <button class="view-by-button" id="ageButton">Age</button>
-            <button class="view-by-button" id="raceButton">Race</button>
-            <button class="view-by-button" id="genderButton">Gender</button>
+        <div id="viewByTitle">View By</div>
+        <div id="viewByImages">
+            <!-- View by images -->
+            <div class="view-by-filter" id="ageButton">
+                <img src="age.png" alt="Age">
+                <span class="view-by-label">Age</span>
+            </div>
+            <div class="view-by-filter" id="genderButton">
+                <img src="gender.png" alt="Gender">
+                <span class="view-by-label">Gender</span>
+            </div>
         </div>
     </div>
     <div id="chart"></div>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
-        // Load data
         d3.csv('coffee_survey.csv').then(data => {
-            // Process data for visualization
             const ageGroups = ['<18', '18-24', '25-34', '35-44', '45-54', '55-64', '>65'];
-            const coffeeTypes = ['Regular Drip', 'Pourover', 'Mocha', 'Latte', 'Iced Coffee', 'Espresso', 'Cortado', 'Cold Brew', 'Cappuccino', 'Blended Drink', 'Americano', 'Other'];
-
-            // Initialize selected coffee types
-            let selectedCoffeeTypes = coffeeTypes.slice();
+            const genderGroups = ['Male', 'Female'];
+            const coffeeTypes = [
+                { type: 'Regular Drip', color: '#FFB6C1' },
+                { type: 'Pourover', color: '#87CEFA' },
+                { type: 'Mocha', color: '#9370DB' },
+                { type: 'Latte', color: '#FFD700' },
+                { type: 'Iced Coffee', color: '#FFA07A' },
+                { type: 'Espresso', color: '#BA55D3' },
+                { type: 'Cortado', color: '#66CDAA' }, /* Updated color for Cortado */
+                { type: 'Cold Brew', color: '#40E0D0' },
+                { type: 'Cappuccino', color: '#FF69B4' },
+                { type: 'Blended Drink', color: '#FFDAB9' },
+                { type: 'Americano', color: '#FF6347' },
+                { type: 'Other', color: '#DDA0DD' }
+            ];
+            let selectedCoffeeTypes = coffeeTypes.map(ct => ct.type);
             let viewBy = 'age';
 
-            // Function to update chart based on filters
+            const color = d3.scaleOrdinal()
+                .domain(coffeeTypes.map(ct => ct.type))
+                .range(coffeeTypes.map(ct => ct.color));
+
             function updateChart() {
-                const filteredData = data.filter(d => {
-                    // Filter by selected coffee types
-                    return selectedCoffeeTypes.includes(d.favorite);
-                });
+                const filterGroups = {
+                    age: ageGroups,
+                    gender: genderGroups
+                };
 
-                // Group data by age group
+                const currentGroups = filterGroups[viewBy];
+
+                const filteredData = data.filter(d => selectedCoffeeTypes.includes(d.favorite) && d[viewBy] !== 'NA' && d[viewBy] !== '');
+
                 const groupedData = {};
-                ageGroups.forEach(age => {
-                    groupedData[age] = filteredData.filter(d => {
-                        // Assuming age is in a column named 'age'
-                        if (d.age === '<18') return age === '<18';
-                        if (d.age === '>65') return age === '>65';
-                        const ageRange = d.age.split('-');
-                        return parseInt(ageRange[0]) >= parseInt(age.split('-')[0]) && parseInt(ageRange[1]) <= parseInt(age.split('-')[1]);
-                    }).length;
+                currentGroups.forEach(group => {
+                    groupedData[group] = {};
+                    selectedCoffeeTypes.forEach(coffeeType => {
+                        groupedData[group][coffeeType] = filteredData.filter(d => {
+                            if (viewBy === 'age') {
+                                if (d.age === '<18') return group === '<18' && d.favorite === coffeeType;
+                                if (d.age === '>65') return group === '>65' && d.favorite === coffeeType;
+                                const ageRange = d.age.split('-');
+                                return parseInt(ageRange[0]) >= parseInt(group.split('-')[0]) && parseInt(ageRange[1]) <= parseInt(group.split('-')[1]) && d.favorite === coffeeType;
+                            }
+                            return d[viewBy] === group && d.favorite === coffeeType;
+                        }).length;
+                    });
                 });
 
-                // Draw bar chart
-                const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+                // Calculate proportions
+                currentGroups.forEach(group => {
+                    const total = d3.sum(Object.values(groupedData[group]));
+                    selectedCoffeeTypes.forEach(coffeeType => {
+                        groupedData[group][coffeeType] = groupedData[group][coffeeType] / total;
+                    });
+                });
+
+                const margin = { top: 40, right: 20, bottom: 30, left: 40 };
                 const width = 800 - margin.left - margin.right;
                 const height = 600 - margin.top - margin.bottom;
 
-                const svg = d3.select('#chart')
-                    .append('svg')
+                d3.select('#chart').selectAll('*').remove();
+
+                const svg = d3.select('#chart').append('svg')
                     .attr('width', width + margin.left + margin.right)
                     .attr('height', height + margin.top + margin.bottom)
                     .append('g')
                     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
                 const xScale = d3.scaleBand()
-                    .domain(ageGroups)
+                    .domain(currentGroups)
                     .range([0, width])
                     .padding(0.2);
 
                 const yScale = d3.scaleLinear()
-                    .domain([0, d3.max(Object.values(groupedData))])
+                    .domain([0, 1])
                     .range([height, 0]);
 
-                svg.selectAll('rect')
-                    .data(ageGroups)
-                    .enter()
-                    .append('rect')
-                    .attr('x', d => xScale(d))
-                    .attr('y', d => yScale(groupedData[d]))
+                const stack = d3.stack()
+                    .keys(selectedCoffeeTypes)
+                    .value((d, key) => d[1][key]);
+
+                const layers = stack(Object.entries(groupedData));
+
+                const tooltip = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+
+                svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", -20) /* Adjusted to add more spacing */
+                    .attr("text-anchor", "middle")
+                    .attr("class", "chart-title")
+                    .style("font-size", "16px")
+                    .style("font-family", "Nunito, sans-serif")
+                    .text(viewBy === 'age' ? 'Favorite Coffee Drink by Age' : 'Favorite Coffee Drink by Gender');
+
+                svg.append('g')
+                    .selectAll('g')
+                    .data(layers)
+                    .enter().append('g')
+                    .attr('fill', d => color(d.key))
+                    .selectAll('rect')
+                    .data(d => d)
+                    .enter().append('rect')
+                    .attr('x', d => xScale(d.data[0]))
+                    .attr('y', d => yScale(d[1]))
+                    .attr('height', d => yScale(d[0]) - yScale(d[1]))
                     .attr('width', xScale.bandwidth())
-                    .attr('height', d => height - yScale(groupedData[d]));
+                    .on("mouseover", (event, d) => {
+                        const coffeeType = d3.select(event.target.parentNode).datum().key;
+                        const proportion = ((d[1] - d[0]) * 100).toFixed(2); // Convert to percentage
+                        const totalSampleSize = d3.sum(Object.values(groupedData[d.data[0]])) * 100; // Convert to sample size
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        tooltip.html(`<strong>${coffeeType}</strong><br>${proportion}%<br>Total Sample Size: ${totalSampleSize}`)
+                            .style("left", (event.pageX + 5) + "px")
+                            .style("top", (event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", (event, d) => {
+                        tooltip.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
 
                 svg.append('g')
                     .attr('transform', `translate(0, ${height})`)
-                    .call(d3.axisBottom(xScale));
+                    .call(d3.axisBottom(xScale))
+                    .selectAll("text")
+                    .style("font-family", "Nunito, sans-serif"); /* Apply Nunito font to x-axis labels */
 
                 svg.append('g')
-                    .call(d3.axisLeft(yScale));
+                    .call(d3.axisLeft(yScale).tickFormat(d3.format(".0%"))) // Format y-axis as percentage
+                    .selectAll("text")
+                    .style("font-family", "Nunito, sans-serif"); /* Apply Nunito font to y-axis labels */
             }
 
-            // Event listeners for coffee type filters
-            d3.selectAll('.coffee-type-filter')
-                .on('click', function() {
-                    const coffeeType = this.querySelector('img').alt;
-                    if (selectedCoffeeTypes.includes(coffeeType)) {
-                        selectedCoffeeTypes = selectedCoffeeTypes.filter(t => t !== coffeeType);
-                        d3.select(this).classed('active', false);
-                    } else {
-                        selectedCoffeeTypes.push(coffeeType);
-                        d3.select(this).classed('active', true);
-                    }
-                    updateChart();
-                });
+            d3.selectAll('.coffee-type-filter').on('click', function() {
+                const coffeeType = this.querySelector('img').alt;
+                if (selectedCoffeeTypes.includes(coffeeType)) {
+                    selectedCoffeeTypes = selectedCoffeeTypes.filter(t => t !== coffeeType);
+                    d3.select(this).classed('active', false);
+                    d3.select(this).select('img').style('border', 'none');
+                } else {
+                    selectedCoffeeTypes.push(coffeeType);
+                    d3.select(this).classed('active', true);
+                    d3.select(this).select('img').style('border', `2px solid ${color(coffeeType)}`);
+                }
+                updateChart();
+            });
 
-            // Initialize active state for all filters
-            d3.selectAll('.coffee-type-filter')
-                .each(function() {
-                    const coffeeType = this.querySelector('img').alt;
-                    if (selectedCoffeeTypes.includes(coffeeType)) {
-                        d3.select(this).classed('active', true);
-                    }
-                });
+            d3.selectAll('.coffee-type-filter').each(function() {
+                const coffeeType = this.querySelector('img').alt;
+                if (selectedCoffeeTypes.includes(coffeeType)) {
+                    d3.select(this).classed('active', true);
+                    d3.select(this).select('img').style('border', `2px solid ${color(coffeeType)}`);
+                }
+            });
 
-            // Event listener for select all/clear all buttons
-            d3.select('#selectAll')
-                .on('click', () => {
-                    selectedCoffeeTypes = coffeeTypes.slice();
-                    d3.selectAll('.coffee-type-filter').classed('active', true);
-                    updateChart();
-                });
-
-            d3.select('#clearAll')
-                .on('click', () => {
+            d3.select('#selectClearAll').on('click', () => {
+                if (selectedCoffeeTypes.length === coffeeTypes.length) {
                     selectedCoffeeTypes = [];
                     d3.selectAll('.coffee-type-filter').classed('active', false);
-                    updateChart();
-                });
+                    d3.selectAll('.coffee-type-filter img').style('border', 'none');
+                } else {
+                    selectedCoffeeTypes = coffeeTypes.map(ct => ct.type);
+                    d3.selectAll('.coffee-type-filter').classed('active', true);
+                    d3.selectAll('.coffee-type-filter img').each(function() {
+                        const coffeeType = this.alt;
+                        d3.select(this).style('border', `2px solid ${color(coffeeType)}`);
+                    });
+                }
+                updateChart();
+            });
 
-            // Event listeners for view by filters
-            d3.select('#ageButton')
-                .on('click', () => {
-                    viewBy = 'age';
-                    d3.selectAll('.view-by-button').classed('active', false);
-                    d3.select('#ageButton').classed('active', true);
-                    updateChart();
-                });
+            d3.selectAll('.view-by-filter').on('click', function() {
+                const filterType = this.querySelector('img').alt.toLowerCase();
+                viewBy = filterType;
+                d3.selectAll('.view-by-filter').classed('active', false);
+                d3.select(this).classed('active', true);
+                d3.selectAll('.view-by-filter img').style('border', 'none');
+                d3.select(this).select('img').style('border', '2px solid #000'); // Black border for active view by filter
+                updateChart();
+            });
 
-            d3.select('#raceButton')
-                .on('click', () => {
-                    viewBy = 'race';
-                    d3.selectAll('.view-by-button').classed('active', false);
-                    d3.select('#raceButton').classed('active', true);
-                    // Implement logic to group by race
-                    console.log('Group by race not implemented yet');
-                });
+            // Set the initial outline for the age filter
+            d3.select('#ageButton').classed('active', true);
+            d3.select('#ageButton img').style('border', '2px solid #000');
 
-            d3.select('#genderButton')
-                .on('click', () => {
-                    viewBy = 'gender';
-                    d3.selectAll('.view-by-button').classed('active', false);
-                    d3.select('#genderButton').classed('active', true);
-                    // Implement logic to group by gender
-                    console.log('Group by gender not implemented yet');
-                });
-
-            // Initial chart draw
             updateChart();
         });
     </script>
