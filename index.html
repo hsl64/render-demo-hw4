@@ -3,99 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evolving Coffee Tastes</title>
+    <title>Homework 4</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #ffffff; /* White background */
         }
-
         #navbar {
-            background-color: #faf0e6; /* Light grey background for nav bar */
+            background-color: #faf0e6;
             padding: 15px;
             text-align: center;
         }
-
         #title {
             font-size: 32px;
             margin: 0;
+            padding: 15px 0;
         }
-
         #filters {
             text-align: center;
             margin-top: 20px;
         }
-
         #coffeeTypeTitle, #viewByTitle {
             font-size: 24px;
             margin-bottom: 10px;
             margin-top: 10px;
         }
-
         #coffeeTypeImages, #viewByImages {
             margin-top: 10px;
             margin-bottom: 10px;
         }
-
         .coffee-type-filter, .view-by-filter {
             display: inline-block;
             margin: 5px;
             cursor: pointer;
             text-align: center;
         }
-
         .coffee-type-filter img, .view-by-filter img {
             width: 90px;
             height: 90px;
-            padding: 2px; /* Add padding */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
-            border-radius: 5px; /* Round the outlined filters by 5px */
+            padding: 2px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 2px solid #F5F5F5;
         }
-
         .coffee-type-label, .view-by-label {
             display: block;
             margin-top: 5px;
-            font-size: 12px; /* Slightly smaller font size */
+            font-size: 12px;
         }
-
         .rounded-button {
-            font-family: 'Nunito', sans-serif; /* Apply Nunito font */
+            font-family: 'Nunito', sans-serif;
             border-radius: 5px;
-            padding: 5px 10px; /* Smaller button size */
+            padding: 5px 10px;
             border: none;
             background-color: #faf0e6;
             cursor: pointer;
             margin: 5px;
-            font-size: 14px; /* Smaller font size */
+            font-size: 12px;
         }
-
-        #chart {
+        #chart-container {
             width: 800px;
             height: 600px;
             margin: auto;
             padding: 20px;
+            border-radius: 5px;
+            border: 5px solid #faf0e6;
         }
-
+        #chart {
+            width: 100%;
+            height: 100%;
+        }
         .axis text {
-            font-family: 'Nunito', sans-serif; /* Apply Nunito font to axis labels */
+            font-family: 'Nunito', sans-serif;
         }
-
         .tooltip {
             position: absolute;
             text-align: center;
             padding: 6px;
             font-size: 12px;
-            background: lightsteelblue;
+            background: #faf0e6;
             border: 0px;
             border-radius: 8px;
             pointer-events: none;
             font-family: 'Nunito', sans-serif;
         }
-
         .chart-title {
-            margin-bottom: 20px; /* Add more spacing between the chart title and the actual graph */
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -107,7 +101,6 @@
         <div id="coffeeTypeTitle">Coffee Types</div>
         <button id="selectClearAll" class="rounded-button">Select/Clear All</button>
         <div id="coffeeTypeImages">
-            <!-- Coffee type images -->
             <div class="coffee-type-filter">
                 <img id="regularDrip" src="regular_drip.png" alt="Regular Drip">
                 <span class="coffee-type-label">Regular Drip</span>
@@ -159,7 +152,6 @@
         </div>
         <div id="viewByTitle">View By</div>
         <div id="viewByImages">
-            <!-- View by images -->
             <div class="view-by-filter" id="ageButton">
                 <img src="age.png" alt="Age">
                 <span class="view-by-label">Age</span>
@@ -170,9 +162,10 @@
             </div>
         </div>
     </div>
-    <div id="chart"></div>
+    <div id="chart-container">
+        <div id="chart"></div>
+    </div>
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
         d3.csv('coffee_survey.csv').then(data => {
             const ageGroups = ['<18', '18-24', '25-34', '35-44', '45-54', '55-64', '>65'];
@@ -184,7 +177,7 @@
                 { type: 'Latte', color: '#FFD700' },
                 { type: 'Iced Coffee', color: '#FFA07A' },
                 { type: 'Espresso', color: '#BA55D3' },
-                { type: 'Cortado', color: '#66CDAA' }, /* Updated color for Cortado */
+                { type: 'Cortado', color: '#66CDAA' },
                 { type: 'Cold Brew', color: '#40E0D0' },
                 { type: 'Cappuccino', color: '#FF69B4' },
                 { type: 'Blended Drink', color: '#FFDAB9' },
@@ -203,11 +196,8 @@
                     age: ageGroups,
                     gender: genderGroups
                 };
-
                 const currentGroups = filterGroups[viewBy];
-
                 const filteredData = data.filter(d => selectedCoffeeTypes.includes(d.favorite) && d[viewBy] !== 'NA' && d[viewBy] !== '');
-
                 const groupedData = {};
                 currentGroups.forEach(group => {
                     groupedData[group] = {};
@@ -224,15 +214,7 @@
                     });
                 });
 
-                // Calculate proportions
-                currentGroups.forEach(group => {
-                    const total = d3.sum(Object.values(groupedData[group]));
-                    selectedCoffeeTypes.forEach(coffeeType => {
-                        groupedData[group][coffeeType] = groupedData[group][coffeeType] / total;
-                    });
-                });
-
-                const margin = { top: 40, right: 20, bottom: 30, left: 40 };
+                const margin = { top: 60, right: 20, bottom: 30, left: 50 }; 
                 const width = 800 - margin.left - margin.right;
                 const height = 600 - margin.top - margin.bottom;
 
@@ -250,7 +232,7 @@
                     .padding(0.2);
 
                 const yScale = d3.scaleLinear()
-                    .domain([0, 1])
+                    .domain([0, d3.max(currentGroups.map(group => d3.sum(Object.values(groupedData[group]))))])
                     .range([height, 0]);
 
                 const stack = d3.stack()
@@ -265,7 +247,7 @@
 
                 svg.append("text")
                     .attr("x", width / 2)
-                    .attr("y", -20) /* Adjusted to add more spacing */
+                    .attr("y", -20)
                     .attr("text-anchor", "middle")
                     .attr("class", "chart-title")
                     .style("font-size", "16px")
@@ -286,12 +268,13 @@
                     .attr('width', xScale.bandwidth())
                     .on("mouseover", (event, d) => {
                         const coffeeType = d3.select(event.target.parentNode).datum().key;
-                        const proportion = ((d[1] - d[0]) * 100).toFixed(2); // Convert to percentage
-                        const totalSampleSize = d3.sum(Object.values(groupedData[d.data[0]])) * 100; // Convert to sample size
+                        const count = d[1] - d[0];
+                        const total = d3.sum(Object.values(groupedData[d.data[0]]));
+                        const percentage = ((count / total) * 100).toFixed(2);
                         tooltip.transition()
                             .duration(200)
                             .style("opacity", .9);
-                        tooltip.html(`<strong>${coffeeType}</strong><br>${proportion}%<br>Total Sample Size: ${totalSampleSize}`)
+                        tooltip.html(`<strong>${coffeeType}</strong><br>Percentage: ${percentage}%`)
                             .style("left", (event.pageX + 5) + "px")
                             .style("top", (event.pageY - 28) + "px");
                     })
@@ -305,12 +288,12 @@
                     .attr('transform', `translate(0, ${height})`)
                     .call(d3.axisBottom(xScale))
                     .selectAll("text")
-                    .style("font-family", "Nunito, sans-serif"); /* Apply Nunito font to x-axis labels */
+                    .style("font-family", "Nunito, sans-serif");
 
                 svg.append('g')
-                    .call(d3.axisLeft(yScale).tickFormat(d3.format(".0%"))) // Format y-axis as percentage
+                    .call(d3.axisLeft(yScale).ticks(7))
                     .selectAll("text")
-                    .style("font-family", "Nunito, sans-serif"); /* Apply Nunito font to y-axis labels */
+                    .style("font-family", "Nunito, sans-serif");
             }
 
             d3.selectAll('.coffee-type-filter').on('click', function() {
@@ -318,7 +301,7 @@
                 if (selectedCoffeeTypes.includes(coffeeType)) {
                     selectedCoffeeTypes = selectedCoffeeTypes.filter(t => t !== coffeeType);
                     d3.select(this).classed('active', false);
-                    d3.select(this).select('img').style('border', 'none');
+                    d3.select(this).select('img').style('border', '2px solid #F5F5F5');
                 } else {
                     selectedCoffeeTypes.push(coffeeType);
                     d3.select(this).classed('active', true);
@@ -339,7 +322,7 @@
                 if (selectedCoffeeTypes.length === coffeeTypes.length) {
                     selectedCoffeeTypes = [];
                     d3.selectAll('.coffee-type-filter').classed('active', false);
-                    d3.selectAll('.coffee-type-filter img').style('border', 'none');
+                    d3.selectAll('.coffee-type-filter img').style('border', '2px solid #F5F5F5');
                 } else {
                     selectedCoffeeTypes = coffeeTypes.map(ct => ct.type);
                     d3.selectAll('.coffee-type-filter').classed('active', true);
@@ -356,12 +339,11 @@
                 viewBy = filterType;
                 d3.selectAll('.view-by-filter').classed('active', false);
                 d3.select(this).classed('active', true);
-                d3.selectAll('.view-by-filter img').style('border', 'none');
-                d3.select(this).select('img').style('border', '2px solid #000'); // Black border for active view by filter
+                d3.selectAll('.view-by-filter img').style('border', '2px solid #F5F5F5');
+                d3.select(this).select('img').style('border', '2px solid #000');
                 updateChart();
             });
 
-            // Set the initial outline for the age filter
             d3.select('#ageButton').classed('active', true);
             d3.select('#ageButton img').style('border', '2px solid #000');
 
